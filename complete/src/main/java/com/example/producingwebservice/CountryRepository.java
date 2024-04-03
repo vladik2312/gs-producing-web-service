@@ -1,47 +1,47 @@
 package com.example.producingwebservice;
 
-import jakarta.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.spring.guides.gs_producing_web_service.Country;
 import io.spring.guides.gs_producing_web_service.Currency;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.util.List;
+
 @Component
 public class CountryRepository {
-	private static final Map<String, Country> countries = new HashMap<>();
+	private final JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	public CountryRepository(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	@PostConstruct
 	public void initData() {
-		Country spain = new Country();
-		spain.setName("Spain");
-		spain.setCapital("Madrid");
-		spain.setCurrency(Currency.EUR);
-		spain.setPopulation(46704314);
-
-		countries.put(spain.getName(), spain);
-
-		Country poland = new Country();
-		poland.setName("Poland");
-		poland.setCapital("Warsaw");
-		poland.setCurrency(Currency.PLN);
-		poland.setPopulation(38186860);
-
-		countries.put(poland.getName(), poland);
-
-		Country uk = new Country();
-		uk.setName("United Kingdom");
-		uk.setCapital("London");
-		uk.setCurrency(Currency.GBP);
-		uk.setPopulation(63705000);
-
-		countries.put(uk.getName(), uk);
+		// Initialization not needed since data is retrieved from the database
 	}
 
 	public Country findCountry(String name) {
 		Assert.notNull(name, "The country's name must not be null");
-		return countries.get(name);
+
+		String sql = "SELECT * FROM Country WHERE name = ?";
+		List<Country> countries = jdbcTemplate.query(sql, new Object[]{name}, (rs, rowNum) -> {
+			Country country = new Country();
+			country.setName(rs.getString("name"));
+			country.setCapital(rs.getString("capital"));
+			country.setCurrency(Currency.valueOf(rs.getString("currency")));
+			country.setPopulation(rs.getInt("population"));
+			return country;
+		});
+
+		if (countries.isEmpty()) {
+			return null;
+		}
+
+		return countries.get(0);
 	}
 }
