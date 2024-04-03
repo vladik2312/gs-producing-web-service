@@ -58,9 +58,16 @@ bootJar {
 
 // tag::dependencies[]
 dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.32'
+	annotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.32'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'wsdl4j:wsdl4j'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'mysql:mysql-connector-java:8.0.33'
 	jaxb("org.glassfish.jaxb:jaxb-xjc")
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
